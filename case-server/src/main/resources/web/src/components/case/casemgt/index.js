@@ -8,7 +8,7 @@ import getQueryString from '@/utils/getCookies';
 const getCookies = getQueryString.getCookie;
 import moment from 'moment';
 import Link from 'umi/link';
-import AgileTCEditor from '@didi/react-agiletc-editor';
+import AgileTCEditor from 'react-agiletc-editor';
 /* global staffNamePY */
 export default class CaseMgt extends React.Component {
   static propTypes = {
@@ -186,9 +186,15 @@ export default class CaseMgt extends React.Component {
       <div style={{ position: 'relative', minHeight: '80vh' }}>
         <Breadcrumb style={{ marginBottom: 8, fontSize: 12 }}>
           <Breadcrumb.Item>
-            <Link to="/case/caseList/1">用例管理</Link>
+            <Link to="/case/caseList/1">
+              {casedetail ? '用例' : '任务'}管理
+            </Link>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>用例详情</Breadcrumb.Item>
+          <Breadcrumb.Item>{casedetail ? '用例' : '任务'}详情</Breadcrumb.Item>
+          <Breadcrumb.Item>
+            {recordDetail ? recordDetail.title : ''}
+            {casedetail ? casedetail.title : ''}
+          </Breadcrumb.Item>
         </Breadcrumb>
         <div
           style={{
@@ -198,14 +204,6 @@ export default class CaseMgt extends React.Component {
         >
           {(recordDetail && (
             <Row>
-              <Col>
-                <Row className="case-title m-b-18">
-                  <Col span="2">测试记录:</Col>
-
-                  <Col span="22">{recordDetail.title}</Col>
-                </Row>
-              </Col>
-
               <Col span="6" className="description-case elipsis-case">
                 <Tooltip
                   title={recordDetail.description}
@@ -338,13 +336,6 @@ export default class CaseMgt extends React.Component {
 
           {(casedetail && (
             <Row>
-              <Col className="case-title">
-                <Row className="m-b-18">
-                  <Col span="2">用例集名称:</Col>
-
-                  <Col span="22">{casedetail.title}</Col>
-                </Row>
-              </Col>
               <Col span="6" className="description-case elipsis-case">
                 <Tooltip title={casedetail.description} placement="topLeft">
                   {casedetail.description}
@@ -404,7 +395,7 @@ export default class CaseMgt extends React.Component {
             tags={['前置条件', '执行步骤', '预期结果']}
             progressShow={progressShow}
             readOnly={readOnly}
-            editorStyle={{ height: 'calc(100vh - 200px)' }}
+            editorStyle={{ height: 'calc(100vh - 100px)' }}
             toolbar={{
               image: false,
               theme: ['classic-compact', 'fresh-blue', 'fresh-green-compat'],
@@ -413,6 +404,14 @@ export default class CaseMgt extends React.Component {
             baseUrl="/"
             uploadUrl="/api/projmgr/common/uploadAttachment"
             wsUrl={`ws://${window.location.host}/api/case/${caseId}/${itemid}/${iscore}/${user}`}
+            onSave={
+              Number(iscore) !== 2
+                ? () => {
+                    message.loading('保存中......', 1);
+                    this.updateCase();
+                  }
+                : null
+            }
           />
         </div>
       </div>
